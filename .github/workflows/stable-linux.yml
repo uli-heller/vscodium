@@ -181,6 +181,22 @@ jobs:
         run: ./update_version.sh
         if: env.SHOULD_DEPLOY == 'yes'
 
+  appimage:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+        - amd64
+        - arm64
+    if: needs.build.outputs.SHOULD_DEPLOY == 'yes'
+
+    steps:
+      - name: Build appimage
+        run: ./build/linux/appimage/build.sh
+
   aur:
     needs:
       - build
