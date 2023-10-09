@@ -4,7 +4,6 @@
 set -e
 
 APP_NAME_LC="$( echo "${APP_NAME}" | awk '{print tolower($0)}' )"
-SHOULD_BUILD_RPM=no
 
 npm install -g checksum
 
@@ -131,7 +130,7 @@ else
   fi
 
   if [[ "${SHOULD_BUILD_RPM}" != "no" ]]; then
-    yarn gulp "vscode-linux-${VSCODE_ARCH}-build-rpm"
+    yarn gulp "vscode-linux-${VSCODE_ARCH}-build-rpm" || { echo "Error building rpm -> ignored"; SHOULD_BUILD_RPM=no; }
   fi
 
   if [[ "${SHOULD_BUILD_APPIMAGE}" != "no" ]]; then
