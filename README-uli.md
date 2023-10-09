@@ -4,8 +4,7 @@ Trying to build the appimage
 I use Ubuntu-20.04 as basis for the build.
 
 ```
-$ sudo apt install -y jq git g++ gcc make python2.7 pkg-config libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev
-...
+$ sudo apt install -y jq git g++ gcc make python2.7 pkg-config libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev imagemagick
 
 $ git clone git@github.com:uli-heller/vscodium.git
 Cloning into 'vscodium'...
@@ -16,20 +15,10 @@ remote: Total 5172 (delta 2892), reused 5075 (delta 2884), pack-reused 3
 Receiving objects: 100% (5172/5172), 29.14 MiB | 4.32 MiB/s, done.
 Resolving deltas: 100% (2892/2892), done.
 
-$ ./build/build.sh 
-OS_NAME="linux"
-SKIP_SOURCE="no"
-SKIP_BUILD="no"
-SKIP_ASSETS="yes"
-VSCODE_ARCH="x64"
-VSCODE_LATEST="no"
-VSCODE_QUALITY="stable"
-get_repo.sh: line 24: jq: command not found
-
 $ # node-v16.20.2-linux-x64.tar.xz manually installed, node18 does not work
 $ npm install --global yarn
 
-$ ./build/build.sh
+$ ./build/build.sh -p
 ```
 
 ## Problems
@@ -139,6 +128,54 @@ sudo apt-get install -y g++ gcc make python2.7 pkg-config libx11-dev libxkbfile-
 
 According to [StackOverflow](https://stackoverflow.com/questions/55878536/no-package-xkbfile-found-when-build-vscode-on-ubuntu).
 
+### 'vscode-linux-x64-build-rpm' errored after 47 ms
+
+```
+...
+[17:21:36] Finished 'vscode-linux-x64-build-deb' after 1.18 min
+Done in 76.25s.
+++ [[ '' != \n\o ]]
+++ yarn gulp vscode-linux-x64-build-rpm
+yarn run v1.22.19
+$ node --max_old_space_size=8192 ./node_modules/gulp/bin/gulp.js vscode-linux-x64-build-rpm
+[17:21:42] Using gulpfile ~/build/vscodium/vscode/gulpfile.js
+[17:21:42] Starting 'vscode-linux-x64-build-rpm'...
+[17:21:42] Starting clean-x86_64 ...
+[17:21:42] Finished clean-x86_64 after 2 ms
+[17:21:42] Starting vscode-linux-x64-prepare-rpm ...
+[17:21:42] 'vscode-linux-x64-build-rpm' errored after 47 ms
+[17:21:42] Error: find-requires failed with exit code null.
+stderr: null
+    at calculatePackageDeps (/home/ubuntu/build/vscodium/vscode/build/linux/rpm/calculate-deps.js:31:15)
+    at /home/ubuntu/build/vscodium/vscode/build/linux/rpm/calculate-deps.js:12:44
+    at Array.map (<anonymous>)
+    at generatePackageDeps (/home/ubuntu/build/vscodium/vscode/build/linux/rpm/calculate-deps.js:12:32)
+    at Object.getDependencies (/home/ubuntu/build/vscodium/vscode/build/linux/dependencies-generator.js:63:50)
+    at /home/ubuntu/build/vscodium/vscode/build/gulpfile.vscode.linux.js:187:46
+    at /home/ubuntu/build/vscodium/vscode/build/lib/task.js:45:28
+    at new Promise (<anonymous>)
+    at _doExecute (/home/ubuntu/build/vscodium/vscode/build/lib/task.js:34:12)
+    at _execute (/home/ubuntu/build/vscodium/vscode/build/lib/task.js:25:11)
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+```
+
+Fixed by:
+
+```diff
+diff --git a/prepare_assets.sh b/prepare_assets.sh
+index fdee918..42f101d 100755
+--- a/prepare_assets.sh
++++ b/prepare_assets.sh
+@@ -4,6 +4,7 @@
+ set -e
+ 
+ APP_NAME_LC="$( echo "${APP_NAME}" | awk '{print tolower($0)}' )"
++SHOULD_BUILD_RPM=no
+ 
+ npm install -g checksum
+```
+
 ### No AppImage
 
 ```diff
@@ -178,3 +215,43 @@ index 44cc343..fdee918 100755
    VSCODE_PLATFORM="linux"
  fi
 ```
+
+New error:
+
+```
+...
++ sed -i -e 's|^_script+=("||g' /tmp/recipe_script
++ sed -i -e 's|")$||g' /tmp/recipe_script
++ bash -ex /tmp/recipe_script
++ sed -i -e 's|/usr/share/pixmaps/||g' usr/share/applications/codium.desktop
++ cp usr/share/applications/codium.desktop .
++ cp usr/share/pixmaps/vscodium.png .
++ /usr/bin/convert vscodium.png -resize 512x512 usr/share/icons/hicolor/512x512/apps/vscodium.png
+/tmp/recipe_script: line 4: /usr/bin/convert: No such file or directory
+```
+
+Fixed by:
+
+```
+sudo apt install imagemagick
+```
+
+Still no appimage!
+
+```diff
+diff --git a/build/linux/appimage/recipe.yml b/build/linux/appimage/recipe.yml
+index 59c2737..b4a8ee0 100644
+--- a/build/linux/appimage/recipe.yml
++++ b/build/linux/appimage/recipe.yml
+@@ -17,7 +17,7 @@ ingredients:
+   script:
+     - pwd
+     - cp ../../../../vscode/.build/linux/deb/amd64/deb/*.deb .
+-    - ls @@APPNAME@@_*.deb | cut -d _ -f 2 > VERSION
++    - ls -t @@APPNAME@@_*.deb | head -1 | cut -d _ -f 2 > VERSION
+ 
+ script:
+   - sed -i -e 's|/usr/share/pixmaps/||g' usr/share/applications/@@APPNAME@@.desktop
+```
+
+Now I see an appimage!
