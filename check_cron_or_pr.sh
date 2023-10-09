@@ -31,7 +31,7 @@ else
 fi
 
 if [[ "${GITHUB_ENV}" ]]; then
-  SHOULD_DEPLOY=
+  SHOULD_DEPLOY=yes
   echo "GITHUB_BRANCH=${GITHUB_BRANCH}" >> "${GITHUB_ENV}"
   echo "SHOULD_BUILD=${SHOULD_BUILD}" >> "${GITHUB_ENV}"
   echo "SHOULD_DEPLOY=${SHOULD_DEPLOY}" >> "${GITHUB_ENV}"
