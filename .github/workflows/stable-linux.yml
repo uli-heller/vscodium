@@ -165,7 +165,7 @@ jobs:
 
       - name: Prepare assets
         env:
-	  SHOULD_BUILD_APPIMAGE: no
+          SHOULD_BUILD_APPIMAGE: "no"
         run: ./prepare_assets.sh
         if: env.SHOULD_BUILD == 'yes' && (env.SHOULD_DEPLOY == 'yes' || github.event.inputs.test_asset_builder == 'true')
 
