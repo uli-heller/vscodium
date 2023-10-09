@@ -190,7 +190,6 @@ jobs:
       matrix:
         platform:
         - amd64
-        - arm64
     if: needs.build.outputs.SHOULD_DEPLOY == 'yes'
 
     steps:
