@@ -156,16 +156,15 @@ jobs:
           name: remote-dependencies-${{ matrix.vscode_arch }}
         if: env.SHOULD_BUILD == 'yes' && matrix.vscode_arch == 'x64'
 
-      - name: Check environment
-        run: cat /etc/lsb-release && uname -a
-        if: env.SHOULD_BUILD == 'yes'
-
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           npm_config_arch: ${{ matrix.npm_arch }}
         run: ./build.sh
         if: env.SHOULD_BUILD == 'yes'
+
+      - name: Check environment
+        run: cat /etc/lsb-release && uname -a
 
       - name: Prepare assets
         run: ./prepare_assets.sh
