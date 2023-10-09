@@ -187,6 +187,12 @@ jobs:
     needs:
       - build
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+        - amd64
+    if: needs.build.outputs.SHOULD_DEPLOY == 'yes'
 
     steps:
       - name: Prepare assets
