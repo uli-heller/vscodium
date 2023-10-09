@@ -164,6 +164,8 @@ jobs:
         if: env.SHOULD_BUILD == 'yes'
 
       - name: Prepare assets
+        container:
+          image: ubuntu-latest
         run: ./prepare_assets.sh
         if: env.SHOULD_BUILD == 'yes' && (env.SHOULD_DEPLOY == 'yes' || github.event.inputs.test_asset_builder == 'true')
 
