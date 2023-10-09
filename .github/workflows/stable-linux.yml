@@ -164,8 +164,8 @@ jobs:
         if: env.SHOULD_BUILD == 'yes'
 
       - name: Prepare assets
-        container:
-          image: ubuntu-latest
+        env:
+	  SHOULD_BUILD_APPIMAGE: no
         run: ./prepare_assets.sh
         if: env.SHOULD_BUILD == 'yes' && (env.SHOULD_DEPLOY == 'yes' || github.event.inputs.test_asset_builder == 'true')
 
@@ -182,6 +182,16 @@ jobs:
           GITHUB_USERNAME: ${{ github.repository_owner }}
         run: ./update_version.sh
         if: env.SHOULD_DEPLOY == 'yes'
+
+  appimage:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Prepare assets
+        run: ./prepare_assets.sh
+        if: env.SHOULD_BUILD == 'yes' && (env.SHOULD_DEPLOY == 'yes' || github.event.inputs.test_asset_builder == 'true')
 
   aur:
     needs:
