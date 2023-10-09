@@ -11,9 +11,9 @@ ingredients:
   packages:
     - code
     - libgconf2-4
-  dist: bionic
+  dist: trusty
   sources:
-    - deb http://archive.ubuntu.com/ubuntu/ bionic main universe
+    - deb http://archive.ubuntu.com/ubuntu/ trusty main universe
   script:
     - pwd
     - cp ../../../../vscode/.build/linux/deb/amd64/deb/*.deb .
