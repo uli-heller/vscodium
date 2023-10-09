@@ -4,6 +4,7 @@
 set -e
 
 APP_NAME_LC="$( echo "${APP_NAME}" | awk '{print tolower($0)}' )"
+SHOULD_BUILD_RPM=no
 
 npm install -g checksum
 
