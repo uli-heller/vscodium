@@ -196,6 +196,9 @@ jobs:
     steps:
       - name: Build appimage
         run: ./build/linux/appimage/build.sh
+      - name: Publish appimage
+        run: |
+          ./build/linux/appimage/appimage-release.sh
 
   aur:
     needs:
