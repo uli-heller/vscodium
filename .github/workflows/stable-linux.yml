@@ -194,6 +194,7 @@ jobs:
     if: needs.build.outputs.SHOULD_DEPLOY == 'yes'
 
     steps:
+      - uses: actions/checkout@v3
       - name: Build appimage
         run: ./build/linux/appimage/build.sh
       - name: Publish appimage
